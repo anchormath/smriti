@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smriti"
+version = "0.1.0"
+description = "Dynamic Partitioned Hierarchical Associative Memory Engine (HAM-P / HAM-R)"
+readme = "sprints/README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0",
+    "faker>=20.0.0",
+    "pyarrow>=14.0.0",
+    "numpy>=1.24.0",
+    "torch>=2.0.0",
+    "sentence-transformers>=3.0.0",
+    "transformers>=4.40.0",
+    "httpx>=0.25.0",
+    "tqdm>=4.66.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
