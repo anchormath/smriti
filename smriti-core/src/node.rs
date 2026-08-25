@@ -46,12 +46,14 @@ impl LeafNode {
         self.memory_matrix.is_empty()
     }
 
-    /// Compute sum vector across all columns up to dim.
+    /// Compute sum vector across all columns using unit-normalized prefix slices.
     pub fn compute_sum_vector(&self, dim: usize) -> Vec<f32> {
         let mut sum = vec![0.0f32; dim];
         for i in 0..self.len() {
-            let col = self.memory_matrix.get_col_slice(i, dim);
-            for (s, &x) in sum.iter_mut().zip(col.iter()) {
+            let col = self.memory_matrix.get_col(i);
+            let mut prefix = col[..dim].to_vec();
+            normalize_in_place(&mut prefix);
+            for (s, &x) in sum.iter_mut().zip(prefix.iter()) {
                 *s += x;
             }
         }

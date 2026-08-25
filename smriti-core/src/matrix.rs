@@ -270,6 +270,95 @@ pub fn compute_centroid(vectors: &[&[f32]], dim: usize) -> Vec<f32> {
     sum
 }
 
+/// Extract an L2-normalized prefix slice of dimension `dim <= v.len()`.
+///
+/// Guarantees that the returned sub-vector strictly satisfies `|norm - 1.0| < 1e-6`.
+#[inline]
+pub fn normalized_prefix_slice(v: &[f32], dim: usize) -> Vec<f32> {
+    assert!(dim <= v.len(), "Requested dim {} exceeds vector len {}", dim, v.len());
+    let mut out = v[..dim].to_vec();
+    normalize_in_place(&mut out);
+    out
+}
+
+/// Numerically stable Log-Sum-Exp with maximum subtraction:
+/// LSE(beta * S) = beta * max(S) + ln(sum_i exp(beta * (S_i - max(S))))
+#[inline]
+pub fn logsumexp(logits: &[f32], beta: f32) -> f32 {
+    if logits.is_empty() {
+        return f32::NEG_INFINITY;
+    }
+    let mut max_val = f32::NEG_INFINITY;
+    for &x in logits {
+        if x > max_val {
+            max_val = x;
+        }
+    }
+    if max_val.is_infinite() {
+        return max_val;
+    }
+
+    let mut sum_exp = 0.0f32;
+    for &x in logits {
+        let diff = (x - max_val) * beta;
+        // Clamp lower bound to avoid underflow subnormals
+        if diff > -80.0 {
+            sum_exp += diff.exp();
+        }
+    }
+
+    if sum_exp <= 0.0 {
+        beta * max_val
+    } else {
+        beta * max_val + sum_exp.ln()
+    }
+}
+
+/// Numerically stable Softmax computation:
+/// out_weights[i] = exp(beta * (S_i - max(S))) / sum_j exp(beta * (S_j - max(S)))
+///
+/// Prevents underflow/overflow and falls back gracefully to uniform weights if total sum is near zero.
+#[inline]
+pub fn softmax_stable(logits: &[f32], beta: f32, out_weights: &mut [f32]) {
+    assert_eq!(logits.len(), out_weights.len());
+    let n = logits.len();
+    if n == 0 {
+        return;
+    }
+    if n == 1 {
+        out_weights[0] = 1.0;
+        return;
+    }
+
+    let mut max_val = f32::NEG_INFINITY;
+    for &x in logits {
+        if x > max_val {
+            max_val = x;
+        }
+    }
+
+    let mut sum_exp = 0.0f32;
+    for (w, &x) in out_weights.iter_mut().zip(logits.iter()) {
+        let diff = (x - max_val) * beta;
+        let e = if diff > -80.0 { diff.exp() } else { 0.0 };
+        *w = e;
+        sum_exp += e;
+    }
+
+    if sum_exp > 1e-12 {
+        let inv_sum = 1.0 / sum_exp;
+        for w in out_weights.iter_mut() {
+            *w *= inv_sum;
+        }
+    } else {
+        // Fallback to uniform distribution
+        let uniform = 1.0 / (n as f32);
+        for w in out_weights.iter_mut() {
+            *w = uniform;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -305,5 +394,51 @@ mod tests {
         assert!((l2_norm(&v) - 1.0).abs() < 1e-6);
         assert!((v[0] - 0.6).abs() < 1e-6);
         assert!((v[1] - 0.8).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_normalized_prefix_slice() {
+        let full = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        let p = normalized_prefix_slice(&full, 3);
+        assert_eq!(p.len(), 3);
+        assert!((l2_norm(&p) - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_softmax_stable_extreme_beta() {
+        let logits = vec![0.1, 0.9, 0.5, 0.2];
+        let mut weights = vec![0.0f32; 4];
+
+        // Moderate beta
+        softmax_stable(&logits, 5.0, &mut weights);
+        let sum: f32 = weights.iter().sum();
+        assert!((sum - 1.0).abs() < 1e-5);
+        assert!(weights[1] > weights[2]);
+
+        // Extreme high beta (should not NaN or overflow)
+        softmax_stable(&logits, 100.0, &mut weights);
+        let sum_high: f32 = weights.iter().sum();
+        assert!((sum_high - 1.0).abs() < 1e-5);
+        assert!(weights[1] > 0.999);
+
+        // Extreme low beta (should approach uniform)
+        softmax_stable(&logits, 0.001, &mut weights);
+        let sum_low: f32 = weights.iter().sum();
+        assert!((sum_low - 1.0).abs() < 1e-5);
+        for &w in &weights {
+            assert!((w - 0.25).abs() < 1e-2);
+        }
+    }
+
+    #[test]
+    fn test_logsumexp_stability() {
+        let logits = vec![1.0, 2.0, 3.0];
+        let lse = logsumexp(&logits, 1.0);
+        let expected = (1.0f32.exp() + 2.0f32.exp() + 3.0f32.exp()).ln();
+        assert!((lse - expected).abs() < 1e-5);
+
+        // High beta stability
+        let lse_high = logsumexp(&logits, 50.0);
+        assert!(!lse_high.is_nan() && !lse_high.is_infinite());
     }
 }

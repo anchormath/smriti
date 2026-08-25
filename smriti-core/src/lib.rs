@@ -1,5 +1,6 @@
 //! PyO3 bindings for the smriti-core HAM-P Rust Engine.
 
+pub mod hopfield;
 pub mod kmeans;
 pub mod matrix;
 pub mod node;
@@ -7,6 +8,7 @@ pub mod router;
 pub mod split;
 pub mod tree;
 
+use hopfield::HopfieldResult;
 use pyo3::prelude::*;
 use tree::HAMPTree;
 
@@ -24,6 +26,35 @@ pub struct PyQueryResult {
 impl PyQueryResult {
     fn __repr__(&self) -> String {
         format!("QueryResult(item_id='{}', score={:.4})", self.item_id, self.score)
+    }
+}
+
+/// Python continuous Hopfield associative retrieval result.
+#[pyclass(name = "HopfieldResult")]
+#[derive(Clone)]
+pub struct PyHopfieldResult {
+    #[pyo3(get)]
+    pub retrieved_vector: Vec<f32>,
+    #[pyo3(get)]
+    pub final_energy: f32,
+    #[pyo3(get)]
+    pub energy_trajectory: Vec<f32>,
+    #[pyo3(get)]
+    pub weights: Vec<f32>,
+    #[pyo3(get)]
+    pub candidate_ids: Vec<String>,
+}
+
+#[pymethods]
+impl PyHopfieldResult {
+    fn __repr__(&self) -> String {
+        format!(
+            "HopfieldResult(dim={}, final_energy={:.4}, steps={}, candidates={})",
+            self.retrieved_vector.len(),
+            self.final_energy,
+            self.energy_trajectory.len() - 1,
+            self.candidate_ids.len()
+        )
     }
 }
 
@@ -71,12 +102,6 @@ pub struct PyHAMPTree {
 #[pymethods]
 impl PyHAMPTree {
     /// Instantiate a new HAM-P Tree.
-    ///
-    /// Parameters:
-    /// - `d0`: Layer 0 root routing dimension (e.g. 64)
-    /// - `d1`: Layer 1 subcategory routing dimension (e.g. 128)
-    /// - `d2`: Layer 2 leaf memory dimension (e.g. 768)
-    /// - `max_leaf_capacity`: Maximum memory count before triggering 2-means split (e.g. 100)
     #[new]
     #[pyo3(signature = (d0=64, d1=128, d2=768, max_leaf_capacity=100))]
     fn new(d0: usize, d1: usize, d2: usize, max_leaf_capacity: usize) -> Self {
@@ -110,7 +135,52 @@ impl PyHAMPTree {
             .collect()
     }
 
-    /// Query batch in parallel across CPU cores using Rayon.
+    /// Query Top-K nearest neighbors using multi-probe beam search with delta margin.
+    #[pyo3(signature = (query_vector, top_k=5, beam_width=3, score_delta=0.05))]
+    fn query_multi_probe(
+        &self,
+        query_vector: Vec<f32>,
+        top_k: usize,
+        beam_width: usize,
+        score_delta: f32,
+    ) -> Vec<PyQueryResult> {
+        self.inner
+            .query_multi_probe(&query_vector, top_k, beam_width, score_delta)
+            .into_iter()
+            .map(|r| PyQueryResult {
+                item_id: r.item_id,
+                score: r.score,
+            })
+            .collect()
+    }
+
+    /// Query continuous Hopfield associative retrieval using the Resolution Dial R in [0.0, 1.0].
+    #[pyo3(signature = (query_vector, resolution=0.5, beam_width=3, score_delta=0.05, max_steps=5))]
+    fn query_hopfield(
+        &self,
+        query_vector: Vec<f32>,
+        resolution: f32,
+        beam_width: usize,
+        score_delta: f32,
+        max_steps: usize,
+    ) -> PyHopfieldResult {
+        let res = self.inner.query_hopfield(
+            &query_vector,
+            resolution,
+            beam_width,
+            score_delta,
+            max_steps,
+        );
+        PyHopfieldResult {
+            retrieved_vector: res.retrieved_vector,
+            final_energy: res.final_energy,
+            energy_trajectory: res.energy_trajectory,
+            weights: res.weights,
+            candidate_ids: res.candidate_ids,
+        }
+    }
+
+    /// Batch parallel query evaluation across CPU cores using Rayon.
     #[pyo3(signature = (queries, top_k=5, beam_width=1))]
     fn query_batch(
         &self,
@@ -130,6 +200,46 @@ impl PyHAMPTree {
                     .collect()
             })
             .collect()
+    }
+
+    /// Batch parallel Hopfield queries across CPU cores using Rayon.
+    #[pyo3(signature = (queries, resolution=0.5, beam_width=3, score_delta=0.05, max_steps=5))]
+    fn query_hopfield_batch(
+        &self,
+        queries: Vec<Vec<f32>>,
+        resolution: f32,
+        beam_width: usize,
+        score_delta: f32,
+        max_steps: usize,
+    ) -> Vec<PyHopfieldResult> {
+        self.inner
+            .query_hopfield_batch(
+                &queries,
+                resolution,
+                beam_width,
+                score_delta,
+                max_steps,
+            )
+            .into_iter()
+            .map(|res: HopfieldResult| PyHopfieldResult {
+                retrieved_vector: res.retrieved_vector,
+                final_energy: res.final_energy,
+                energy_trajectory: res.energy_trajectory,
+                weights: res.weights,
+                candidate_ids: res.candidate_ids,
+            })
+            .collect()
+    }
+
+    /// Compute the continuous Lyapunov energy of a state vector relative to the indexed memories.
+    #[pyo3(signature = (state_vector, beta=1.0))]
+    fn compute_lyapunov_energy(&self, state_vector: Vec<f32>, beta: f32) -> f32 {
+        self.inner.compute_lyapunov_energy(&state_vector, beta)
+    }
+
+    /// Lazy re-centering task to recompute exact centroids directly from leaves.
+    fn recenter(&mut self) {
+        self.inner.recenter();
     }
 
     /// Retrieve tree statistics.
@@ -173,6 +283,7 @@ fn dot_product_py(a: Vec<f32>, b: Vec<f32>) -> f32 {
 fn smriti_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyHAMPTree>()?;
     m.add_class::<PyQueryResult>()?;
+    m.add_class::<PyHopfieldResult>()?;
     m.add_class::<PyTreeStats>()?;
     m.add_function(wrap_pyfunction!(dot_product_py, m)?)?;
     Ok(())

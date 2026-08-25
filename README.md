@@ -227,18 +227,7 @@ print(f"Retrieved Top-5 for {len(batch_results)} batch queries in parallel.")
 
 ---
 
-## 8. Development Roadmap
-
-For the detailed sprint execution plans, technical specifications, and walkthroughs, refer to the **[Sprint Roadmap & Engineering Strategy](sprints/README.md)**.
-
-- [x] **[Sprint 1: Data Engine & MRL Embedding Spike](sprints/sprint-1-data-engine-mrl-spike.md)** ([Plan](sprints/sprint-1-implementation-plan.md) | [Walkthrough](sprints/sprint-1-walkthrough.md))
-- [x] **[Sprint 2: Rust HAM-P Tree Infrastructure & Routing Engine](sprints/sprint-2-ham-p-tree-routing.md)** ([Plan](sprints/sprint-2-implementation-plan.md) | [Walkthrough](sprints/sprint-2-walkthrough.md))
-- [ ] **[Sprint 2.1: HAM-P Engine Hardening & Continuous Hopfield Dynamics](sprints/sprint-2.1-ham-p-hardening.md)** ([Plan](sprints/sprint-2.1-implementation-plan.md))
-- [ ] **[Sprint 3: Continuous Hopfield Resolution Dial & RICE Associative Completion](sprints/sprint-3-hopfield-resolution-dial-eval.md)**
-
----
-
-## 9. References & Theoretical Background
+## 8. References & Theoretical Background
 
 1. **Modern Hopfield Networks:** Ramsauer et al., *"Hopfield Networks is All You Need"*, ICLR 2021.
 2. **Matryoshka Representation Learning:** Kusupati et al., *"Matryoshka Representation Learning"*, NeurIPS 2022.
@@ -249,4 +238,5 @@ For the detailed sprint execution plans, technical specifications, and walkthrou
 ## License
 
 License is TBD.
+
 
