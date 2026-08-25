@@ -1,0 +1,26 @@
+[package]
+name = "smriti-core"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance Rust HAM-P multi-resolution tree routing engine"
+
+[lib]
+name = "smriti_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.22.6", features = ["abi3-py310"] }
+rayon = "1.10.0"
+rand = "0.8.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+
+[features]
+default = ["extension-module"]
+extension-module = ["pyo3/extension-module"]
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
