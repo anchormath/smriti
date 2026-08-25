@@ -107,17 +107,43 @@ gantt
 
 ### Summary of Sprints
 
-- **[Sprint 1: Data Engine & MRL Embeddings Spike (Python)](./sprint-1-data-engine-mrl-spike.md)**
-  - Define EKG Project schema (text context + RICE factors + relational tags).
-  - Build synthetic generator (Faker for structural/quantitative metrics + cheap LLM for technical narratives).
-  - Generate multi-resolution MRL embeddings using open-source models (`nomic-embed-text-v1.5` / `bge-base-en-v1.5`).
-- **[Sprint 2: Rust HAM-P Tree Infrastructure & Routing Engine](./sprint-2-ham-p-tree-routing.md)**
-  - Implement the core 3-layer HAM-P tree in **Rust** (`smriti-core`) with contiguous memory matrices and SIMD dot products.
-  - Benchmark prefix routing recall ($d_0=64 \to d_1=128 \to d_2=768$) against flat $O(M \cdot d)$ brute force.
-  - Implement online insertions, running-mean prototype updates, and dynamic 2-means leaf splitting in Rust with PyO3 bindings.
-- **[Sprint 3: Rust Hopfield Dynamics, Resolution Dial & Evaluation](./sprint-3-hopfield-resolution-dial-eval.md)**
-  - Implement the **Rust** HAM-R continuous Hopfield leaf engine with the Resolution Dial ($\beta(R)$).
-  - Test energy landscape behavior across Resolution Dial settings ($R \in [0.0, 1.0]$) via Python bindings.
-  - Run associative pattern completion to estimate RICE scores on unseen project drafts.
-  - Compile latency, memory footprint, and recall benchmark report.
+| Sprint | Focus | Status | Key Deliverables & Documents |
+| :--- | :--- | :--- | :--- |
+| **Sprint 1** | Data Engine & MRL Embeddings | **Completed** | • [Specification](./sprint-1-data-engine-mrl-spike.md)<br>• [Implementation Plan](./sprint-1-implementation-plan.md)<br>• [Walkthrough](./sprint-1-walkthrough.md) |
+| **Sprint 2** | Rust HAM-P Tree & Routing Engine | **Completed** | • [Specification](./sprint-2-ham-p-tree-routing.md)<br>• [Implementation Plan](./sprint-2-implementation-plan.md)<br>• [Walkthrough](./sprint-2-walkthrough.md) |
+| **Sprint 2.1** | HAM-P Hardening & Lyapunov Dynamics | **In Progress** | • [Specification](./sprint-2.1-ham-p-hardening.md)<br>• [Implementation Plan](./sprint-2.1-implementation-plan.md) |
+| **Sprint 3** | Hopfield Resolution Dial & RICE Completion | **Planned** | • [Specification](./sprint-3-hopfield-resolution-dial-eval.md) |
+
+---
+
+### Detailed Sprint Breakdown
+
+#### **1. [Sprint 1: Data Engine & MRL Embeddings Spike (Python)](./sprint-1-data-engine-mrl-spike.md)**
+- **Status:** **Completed** ([Implementation Plan](./sprint-1-implementation-plan.md) | [Walkthrough](./sprint-1-walkthrough.md))
+- Define EKG Project schema (text context + RICE factors + relational tags).
+- Build synthetic generator (Faker for structural/quantitative metrics + LLM narrative enricher).
+- Generate multi-resolution MRL embeddings using open-source models (`nomic-embed-text-v1.5`, $d_0=64, d_1=128, d_2=768$).
+- Package 3,500 project nodes and 500 test queries into Parquet and JSON datasets.
+
+#### **2. [Sprint 2: Rust HAM-P Tree Infrastructure & Routing Engine](./sprint-2-ham-p-tree-routing.md)**
+- **Status:** **Completed** ([Implementation Plan](./sprint-2-implementation-plan.md) | [Walkthrough](./sprint-2-walkthrough.md))
+- Implement the core 3-layer HAM-P tree in **Rust** (`smriti-core`) with contiguous memory matrices and ARM NEON / SIMD dot products.
+- Benchmark prefix routing recall ($d_0=64 \to d_1=128 \to d_2=768$) achieving **93.8% Top-1** and **95.8% Top-5 recall** at **$26.6\,\mu\text{s}$ CPU latency**.
+- Implement online streaming insertions, exact dual-matrix running centroids (drift $< 10^{-6}$), and dynamic 2-means leaf splitting with PyO3 bindings.
+
+#### **3. [Sprint 2.1: HAM-P Engine Hardening & Continuous Hopfield Dynamics](./sprint-2.1-ham-p-hardening.md)**
+- **Status:** **In Progress / Next** ([Implementation Plan](./sprint-2.1-implementation-plan.md))
+- Audit and enforce strict in-flight $L_2$ prefix re-normalization across all routing passes.
+- Implement multi-probe beam search with $\delta$-margin thresholding to eliminate bucket boundary recall drops.
+- Implement Lyapunov energy evaluation ($E(x)$) and verify monotonic non-increasing energy decay.
+- Add continuous Resolution Dial $\beta(R)$ mapping and adaptive density-scaled inverse temperatures.
+- Benchmark concurrent multithreaded read throughput under continuous write and split load.
+
+#### **4. [Sprint 3: Rust Hopfield Dynamics, Resolution Dial & Evaluation](./sprint-3-hopfield-resolution-dial-eval.md)**
+- **Status:** **Planned**
+- Implement the **Rust** HAM-R continuous Hopfield leaf engine with the Resolution Dial ($\beta(R)$).
+- Test energy landscape attractor behavior across Resolution Dial settings ($R \in [0.0, 1.0]$) via Python bindings.
+- Run associative pattern completion to estimate RICE scores on unseen project drafts.
+- Compile latency, memory footprint, and associative recall benchmark report.
+
 

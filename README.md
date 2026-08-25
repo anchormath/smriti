@@ -2,7 +2,7 @@
 
 [![Rust Core](https://img.shields.io/badge/Rust-1.80+-orange.svg?style=flat-square&logo=rust)](smriti-core/)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg?style=flat-square&logo=python)](pyproject.toml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+[![License: TBD](https://img.shields.io/badge/License-TBD-lightgrey.svg?style=flat-square)](#license)
 [![Tests](https://img.shields.io/badge/Tests-16%2F16%20Passing-success.svg?style=flat-square)](tests/)
 [![Latency](https://img.shields.io/badge/Latency-26.6%20µs-brightgreen.svg?style=flat-square)](#benchmark-results)
 [![Recall](https://img.shields.io/badge/Top--5%20Recall-95.8%25-blueviolet.svg?style=flat-square)](#benchmark-results)
@@ -229,14 +229,12 @@ print(f"Retrieved Top-5 for {len(batch_results)} batch queries in parallel.")
 
 ## 8. Development Roadmap
 
-- [x] **Sprint 1: Data Engine & MRL Embedding Spike**
-  - Schema design, synthetic statistical generators, LLM narrative enrichers, Nomic MRL pipeline.
-- [x] **Sprint 2: Rust HAM-P Tree Infrastructure & Routing Engine**
-  - Contiguous matrix layouts, ARM NEON SIMD dot products, dynamic 2-means leaf splitting, PyO3 bindings, benchmark suite.
-- [ ] **Sprint 2.1: HAM-P Engine Hardening & Continuous Hopfield Dynamics**
-  - In-flight MRL prefix re-normalization, multi-probe $\delta$-margin routing, Lyapunov energy monitoring, resolution dial $\beta(R)$, concurrent read/write stress-tests.
-- [ ] **Sprint 3: Continuous Hopfield Resolution Dial & RICE Associative Completion**
-  - Energy landscape attractor analysis, entropy curves, missing field associative imputation (Reach, Impact, Effort).
+For the detailed sprint execution plans, technical specifications, and walkthroughs, refer to the **[Sprint Roadmap & Engineering Strategy](sprints/README.md)**.
+
+- [x] **[Sprint 1: Data Engine & MRL Embedding Spike](sprints/sprint-1-data-engine-mrl-spike.md)** ([Plan](sprints/sprint-1-implementation-plan.md) | [Walkthrough](sprints/sprint-1-walkthrough.md))
+- [x] **[Sprint 2: Rust HAM-P Tree Infrastructure & Routing Engine](sprints/sprint-2-ham-p-tree-routing.md)** ([Plan](sprints/sprint-2-implementation-plan.md) | [Walkthrough](sprints/sprint-2-walkthrough.md))
+- [ ] **[Sprint 2.1: HAM-P Engine Hardening & Continuous Hopfield Dynamics](sprints/sprint-2.1-ham-p-hardening.md)** ([Plan](sprints/sprint-2.1-implementation-plan.md))
+- [ ] **[Sprint 3: Continuous Hopfield Resolution Dial & RICE Associative Completion](sprints/sprint-3-hopfield-resolution-dial-eval.md)**
 
 ---
 
@@ -250,4 +248,5 @@ print(f"Retrieved Top-5 for {len(batch_results)} batch queries in parallel.")
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+License is TBD.
+
