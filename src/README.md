@@ -7,6 +7,12 @@
 
 `src/smriti` is the high-level Python layer of **Smriti (स्मृति)**. It is responsible for data modeling, synthetic enterprise knowledge graph (EKG) generation, Matryoshka Representation Learning (MRL) embeddings, dataset packaging, and orchestrating native Rust inference.
 
+> [!NOTE]
+> **Domain Testbed & Naksha Adapter:**
+> Much of the current Python layer (`models/`, `generators/`, and `data/`) acts as an adapter for **[Naksha](https://github.com/anchormath/naksha/tree/naksha2)** (Enterprise Architecture & Knowledge Graph system), providing realistic enterprise initiative nodes and RICE scoring metrics as a benchmark domain. 
+> 
+> Future iterations will keep `smriti` as a standalone, general-purpose associative memory engine, with domain-specific schemas and graph adapters maintained separately.
+
 ---
 
 ## 1. Architecture & Package Structure

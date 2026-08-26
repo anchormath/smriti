@@ -3,7 +3,7 @@
 [![Rust Core](https://img.shields.io/badge/Rust-1.80+-orange.svg?style=flat-square&logo=rust)](smriti-core/)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg?style=flat-square&logo=python)](pyproject.toml)
 [![License: TBD](https://img.shields.io/badge/License-TBD-lightgrey.svg?style=flat-square)](#license)
-[![Tests](https://img.shields.io/badge/Tests-16%2F16%20Passing-success.svg?style=flat-square)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-22%2F22%20Passing-success.svg?style=flat-square)](tests/)
 [![Latency](https://img.shields.io/badge/Latency-26.6%20µs-brightgreen.svg?style=flat-square)](#benchmark-results)
 [![Recall](https://img.shields.io/badge/Top--5%20Recall-95.8%25-blueviolet.svg?style=flat-square)](#benchmark-results)
 
@@ -74,6 +74,10 @@ Classical modern continuous Hopfield networks evaluate queries across a single f
 │   • Retrieval: Top-down prefix routing, Multi-probe & Hopfield attention    │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+> [!NOTE]
+> **Naksha Integration & Domain Independence:**
+> Much of the current Python layer acts as an adapter for **[Naksha](https://github.com/anchormath/naksha/tree/naksha2)** (Enterprise Architecture & Knowledge Graph engine), utilizing enterprise initiative nodes and RICE scoring models as a rigorous evaluation testbed. The core memory engine (`smriti-core` and the retrieval tree) is designed as a standalone, domain-agnostic associative memory architecture.
 
 ---
 
