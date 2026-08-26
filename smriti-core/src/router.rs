@@ -180,7 +180,6 @@ pub fn query_tree_multi_probe(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::matrix::ColumnMatrix;
     use crate::node::RoutingNode;
 
     #[test]

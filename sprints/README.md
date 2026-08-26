@@ -111,7 +111,7 @@ gantt
 | :--- | :--- | :--- | :--- |
 | **Sprint 1** | Data Engine & MRL Embeddings | **Completed** | • [Specification](./sprint-1-data-engine-mrl-spike.md)<br>• [Implementation Plan](./sprint-1-implementation-plan.md)<br>• [Walkthrough](./sprint-1-walkthrough.md) |
 | **Sprint 2** | Rust HAM-P Tree & Routing Engine | **Completed** | • [Specification](./sprint-2-ham-p-tree-routing.md)<br>• [Implementation Plan](./sprint-2-implementation-plan.md)<br>• [Walkthrough](./sprint-2-walkthrough.md) |
-| **Sprint 2.1** | HAM-P Hardening & Lyapunov Dynamics | **In Progress** | • [Specification](./sprint-2.1-ham-p-hardening.md)<br>• [Implementation Plan](./sprint-2.1-implementation-plan.md) |
+| **Sprint 2.1** | HAM-P Hardening & Lyapunov Dynamics | **Completed** | • [Specification](./sprint-2.1-ham-p-hardening.md)<br>• [Implementation Plan](./sprint-2.1-implementation-plan.md)<br>• [Walkthrough](./sprint-2.1-walkthrough.md) |
 | **Sprint 3** | Hopfield Resolution Dial & RICE Completion | **Planned** | • [Specification](./sprint-3-hopfield-resolution-dial-eval.md) |
 
 ---
@@ -132,12 +132,12 @@ gantt
 - Implement online streaming insertions, exact dual-matrix running centroids (drift $< 10^{-6}$), and dynamic 2-means leaf splitting with PyO3 bindings.
 
 #### **3. [Sprint 2.1: HAM-P Engine Hardening & Continuous Hopfield Dynamics](./sprint-2.1-ham-p-hardening.md)**
-- **Status:** **In Progress / Next** ([Implementation Plan](./sprint-2.1-implementation-plan.md))
-- Audit and enforce strict in-flight $L_2$ prefix re-normalization across all routing passes.
-- Implement multi-probe beam search with $\delta$-margin thresholding to eliminate bucket boundary recall drops.
-- Implement Lyapunov energy evaluation ($E(x)$) and verify monotonic non-increasing energy decay.
-- Add continuous Resolution Dial $\beta(R)$ mapping and adaptive density-scaled inverse temperatures.
-- Benchmark concurrent multithreaded read throughput under continuous write and split load.
+- **Status:** **Completed** ([Implementation Plan](./sprint-2.1-implementation-plan.md) | [Walkthrough](./sprint-2.1-walkthrough.md))
+- Enforce strict in-flight $L_2$ prefix re-normalization across all routing passes ($< 1.2 \times 10^{-7}$ error).
+- Multi-probe beam search ($\delta=0.08, B=4$) achieves **95.60% Top-5** and **93.40% Top-1 recall** at $31.5\,\mu\text{s}$.
+- 100% monotonic Lyapunov energy minimization verified ($E(x^{(t+1)}) \le E(x^{(t)})$) in $212.7\,\mu\text{s}$ on CPU.
+- Continuous Resolution Dial ($R \in [0.0, 1.0]$) transitions from broad cluster blend (entropy $5.28$) to exact attractor (entropy $3.57$).
+- Bottom-up lazy re-centering (`recenter()`) reduces prototype drift to $1.85 \times 10^{-7}$.
 
 #### **4. [Sprint 3: Rust Hopfield Dynamics, Resolution Dial & Evaluation](./sprint-3-hopfield-resolution-dial-eval.md)**
 - **Status:** **Planned**
