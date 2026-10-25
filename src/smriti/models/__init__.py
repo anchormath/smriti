@@ -2,6 +2,13 @@
 Smriti schema models.
 """
 
+from smriti.models.multimodal_schema import (
+    EnterpriseDomain,
+    ModalityType,
+    MultimodalArtifact,
+    SpatialRegion,
+    TemporalSegment,
+)
 from smriti.models.project_schema import (
     Confidence,
     ConfidencePercentage,
@@ -26,14 +33,20 @@ __all__ = [
     "ConfidenceTier",
     "Effort",
     "EffortBreakdown",
+    "EnterpriseDomain",
     "EnterpriseProjectNode",
     "GraphRelations",
     "Impact",
     "ImpactScore",
     "ImpactTier",
     "MRLEmbeddings",
+    "ModalityType",
+    "MultimodalArtifact",
     "RICEFactors",
     "Reach",
     "SemanticContext",
+    "SpatialRegion",
     "Taxonomy",
+    "TemporalSegment",
 ]
+
